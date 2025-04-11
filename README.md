@@ -53,7 +53,7 @@ chmod +x ./cs2-autoaccept-linux
 
 You can stop the script by either pressing <kbd>CTRL</kbd>+<kbd>C</kbd> in the terminal or by closing the terminal window entirely.
 
-> [!WARN]
+> [!WARNING]
 > It is important that you run the executable from a terminal. Executing it with a double click may cause it to run in the background forever.
 
 The script will start scanning your screen every 4 seconds.  
