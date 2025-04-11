@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-11 14:21:34
+ * Last Modified: 2025-04-11 14:37:59
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -22,7 +22,9 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h> // Used to simulate mouse click
 
-//using namespace cv;
+#define VERSION "2.0"
+#define INTERVAL 4000   // Time in ms to wait between searches
+
 using namespace std;
 
 
@@ -59,8 +61,8 @@ void intervalEvent()
 
             // Check if color is interesting
             if (red == 0
-                && green >= 100 && green <= 190
-                && blue >= 24 && blue <= 79)
+                && green >= 60 && green <= 210  // TODO: Test different brightness settings
+                && blue >= 10 && blue <= 90)
             {
                 //cout << "Match at " << row << "x" << col << "!" << endl;
                 matches++;
@@ -70,8 +72,8 @@ void intervalEvent()
             if (matches >= 9000)
             {
                 cout << "\r--------------------------------------------" << endl;
-                cout << "[" << i << "] Found button! Accepting match..." << endl;
-                cout << "\nIf everyone accepted and you are loading into the match then please close this window.\nI will otherwise continue searching.\n" << endl;
+                cout << "[" << i << "] Button found! Accepting match..." << endl;
+                cout << "\nPlease close this window if everyone accepted, I will otherwise continue searching.\n" << endl;
 
                 // Set cursor position, click and release (https://www.linuxquestions.org/questions/programming-9/simulating-a-mouse-click-594576/#post2936738)
                 XWarpPointer(display, None, root, 0, 0, 0, 0, row, col); // Update cursor position
@@ -97,12 +99,9 @@ void intervalEvent()
 
 int main() // Entry point
 {
-    const string version    = "1.1";
-    const int checkInterval = 4000;
-
-    cout << "\ncsgo-autoaccept-cpp script version " + version + " by 3urobeat" << endl;
-    cout << "---------------------------------------------------" << endl;
-    cout << "\nChecking for 'Accept' window every " + to_string(checkInterval / 1000) + " seconds..." << endl;
+    cout << "\ncs2-autoaccept-linux v" << VERSION << " by 3urobeat" << endl;
+    cout << "--------------------------------------------" << endl;
+    cout << "\nSearching screen for 'Accept' window every " << INTERVAL / 1000 << " seconds..." << endl;
 
 
     // Establish connection to the X11 server https://stackoverflow.com/questions/24988164/c-fast-screenshots-in-linux-for-use-with-opencv & https://stackoverflow.com/questions/4049877/how-to-save-ximage-as-bitmap
@@ -121,7 +120,7 @@ int main() // Entry point
 
         i++; // Increase counter
 
-        auto x = chrono::steady_clock::now() + chrono::milliseconds(checkInterval);
+        auto x = chrono::steady_clock::now() + chrono::milliseconds(INTERVAL);
         this_thread::sleep_until(x);
     }
 }
