@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-11 14:37:59
+ * Last Modified: 2025-04-11 14:43:17
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -71,7 +71,7 @@ void intervalEvent()
             // If we got 9000 matching pixels then it surely is the Accept button
             if (matches >= 9000)
             {
-                cout << "\r--------------------------------------------" << endl;
+                cout << "\r---------------------------------------------------------------" << endl;
                 cout << "[" << i << "] Button found! Accepting match..." << endl;
                 cout << "\nPlease close this window if everyone accepted, I will otherwise continue searching.\n" << endl;
 
@@ -99,9 +99,13 @@ void intervalEvent()
 
 int main() // Entry point
 {
-    cout << "\ncs2-autoaccept-linux v" << VERSION << " by 3urobeat" << endl;
-    cout << "--------------------------------------------" << endl;
-    cout << "\nSearching screen for 'Accept' window every " << INTERVAL / 1000 << " seconds..." << endl;
+    // Set terminal title
+    cout << "\033]0;cs2-autoaccept-linux v" << VERSION << " by 3urobeat\007";
+
+    // Print welcome message
+    cout << "\n\x1b[36m            cs2-autoaccept-linux v" << VERSION << " by 3urobeat\x1b[0m" << endl; // Cyan and Reset color codes at the beginning and end of the string
+    cout << "---------------------------------------------------------------"  << endl;
+    cout << "Checking your screen for a 'Accept' window every " << INTERVAL / 1000 << " second(s)..." << endl;
 
 
     // Establish connection to the X11 server https://stackoverflow.com/questions/24988164/c-fast-screenshots-in-linux-for-use-with-opencv & https://stackoverflow.com/questions/4049877/how-to-save-ximage-as-bitmap
