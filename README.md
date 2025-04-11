@@ -14,11 +14,6 @@ This script is for Linux only. If you are on Windows see [my other repository fo
 
 ## Download
 **Easy way:**  
-Install `OpenCV` using your package manager (for example on Arch: `sudo pacman -S opencv`)  
-If your package manager's repositories don't contain pre-built opencv binaries you have to compile it yourself. Take a look at the instructions below!  
-
-Note: I had issues with the Arch opencv package where my program would not compile with linker errors. Compiling opencv myself solved this issue. YMMV.
-  
 Head over to the [release section](https://github.com/3urobeat/csgo-autoaccept/releases/latest) and download the latest executable.  
   
 Open a terminal in the folder the executable is now located (your Downloads folder I guess?).  
@@ -30,36 +25,15 @@ And run it: `./csgo-autoaccept-cpp`
 
 **"Harder" way if you would like to compile it yourself:**  
 Clone this repository using git or download it as a .zip.  
-Make sure you have `cmake`, `make` and `g++` installed.  
-  
-Compile & install OpenCV by following these commands:  
-```
-# Download and unpack sources
-wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip
-unzip opencv.zip
-
-# Create build directory
-mkdir -p build && cd build
-
-# Configure
-cmake  ../opencv-4.x
-
-# Build
-cmake --build . -j 8
-
-# Install
-sudo make install
-```
-
-> Replace `-j 8` in the last command with how many CPU threads you would like to dedicate.
-
-&nbsp;
+Make sure you have `libxtst-dev`, `cmake`, `make` and `g++` installed.  
 
 Then open a terminal in the folder containing the files that you cloned from this repository.  
 Go into the build folder: `cd build`  
 Create makefile: `cmake ..`  
-Then compile using make: `make`  
+Then compile using make: `make -j 8`  
   
+> Replace `-j 8` in the last command with how many CPU threads you would like to dedicate.
+
 When completed you can move the `csgo-autoaccept-cpp` binary from the `build` folder to anywhere you like.  
   
 &nbsp;

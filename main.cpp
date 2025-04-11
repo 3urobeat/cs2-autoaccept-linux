@@ -1,13 +1,13 @@
 /*
- * File: Main.cpp
+ * File: main.cpp
  * Project: csgo-autoaccept-cpp
- * Created Date: 04.06.2021 17:00:05
+ * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 11.11.2023 19:08:00
+ * Last Modified: 2025-04-11 14:21:34
  * Modified By: 3urobeat
  *
- * Copyright (c) 2021 3urobeat <https://github.com/3urobeat>
+ * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -18,19 +18,19 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include <opencv2/opencv.hpp> // Call before xlib. Issue: https://github.com/opencv/opencv/issues/7113 (we are in 2021 and this issue from 2016 still seems to exist? or am I at fault?)
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h> // Used to simulate mouse click
 
-using namespace cv;
+//using namespace cv;
 using namespace std;
 
 
-// Some global variables
+// Reusable variables
 int      screen, i, x, y, width, height;
-Display* display;
+Display *display;
 Window   root;
+XImage  *img;
 
 
 // Function that will get executed every checkInterval ms to check the screen for the 'Accept' button
@@ -42,49 +42,56 @@ void intervalEvent()
     bool breakLoop = false;
     int  matches   = 0;
 
-    XImage *img  = XGetImage(display, root, x, y, width, height, AllPlanes, ZPixmap); // Make a screenshot
-    Mat    cvImg = Mat(height, width, CV_8UC4, img->data);                            // Convert XImage into OpenCV Mat
+    // Make a screenshot
+    img = XGetImage(display, root, x, y, width, height, AllPlanes, ZPixmap);
 
-    cvtColor(cvImg, cvImg, COLOR_BGR2HSV);                             // Convert color scheme to HSV which made the recognition in CS better (inRange() just simply didn't recognize any color in the cs window but worked fine everywhere else)
-    inRange(cvImg, Scalar(60, 140, 155), Scalar(70, 150, 175), cvImg); // Apply color mask to filter 'Accept' button (lower & upper threshold)
-
-
-    // Iterate through every pixel in the Mat
-    for (int row = 0; row < cvImg.rows && !breakLoop; row++) // Iterate over all rows in Mat
+    // Iterate over every pixel in the screenshot
+    for (int row = 0; row < width && !breakLoop; row++) // x axis
     {
-        for (int col = 0; col < cvImg.cols && !breakLoop; col++) // Iterate over all coloumns in this row of the Mat
+        for (int col = 0; col < height && !breakLoop; col++) // y axis
         {
-            if (cvImg.at<uchar>(row, col) == 255) // Since inRange() makes matching pixels white we search for Mat entries with the value 255
+            // Get the color of this pixel
+            unsigned long  pxl   = XGetPixel(img, row, col);
+            unsigned short red   = (pxl >> 16) & 0xff;
+            unsigned short green = (pxl >>  8) & 0xff;
+            unsigned short blue  = (pxl >>  0) & 0xff;
+            //cout << "Pixel (" << row << "x" << col << ") Color (RGB): " << red << " " << green << " " << blue << endl;
+
+            // Check if color is interesting
+            if (red == 0
+                && green >= 100 && green <= 190
+                && blue >= 24 && blue <= 79)
             {
-                matches++; // Increment number if this is a match
+                //cout << "Match at " << row << "x" << col << "!" << endl;
+                matches++;
+            }
 
-                if (matches >= 9000) // If we got 9000 matching pixels then it surely is the Accept button
-                {
-                    cout << "\r--------------------------------------------" << endl;
-                    cout << "[" << i << "] Found button! Accepting match..." << endl;
-                    cout << "\nIf everyone accepted and you are in the loading screen then please close this window.\nI will otherwise continue searching.\n" << endl;
+            // If we got 9000 matching pixels then it surely is the Accept button
+            if (matches >= 9000)
+            {
+                cout << "\r--------------------------------------------" << endl;
+                cout << "[" << i << "] Found button! Accepting match..." << endl;
+                cout << "\nIf everyone accepted and you are loading into the match then please close this window.\nI will otherwise continue searching.\n" << endl;
 
-                    // Set cursor position and click
-                    XWarpPointer(display, None, root, 0, 0, 0, 0, col, row); // Update cursor position
-                    XTestFakeButtonEvent(display, 1, True, CurrentTime);     // Press and release left click
-                    XTestFakeButtonEvent(display, 1, False, CurrentTime);
-                    XFlush(display); // Thanks for mentioning that I need to flush the output buffer: https://stackoverflow.com/a/2433488/12934162
+                // Set cursor position, click and release (https://www.linuxquestions.org/questions/programming-9/simulating-a-mouse-click-594576/#post2936738)
+                XWarpPointer(display, None, root, 0, 0, 0, 0, row, col); // Update cursor position
+                XTestFakeButtonEvent(display, 1, True, CurrentTime);     // Press and release left click
+                XTestFakeButtonEvent(display, 1, False, CurrentTime);
+                XFlush(display);                                         // Necessary to execute XWarpPointer
 
-                    // Stop loop prematurely
-                    breakLoop = true;
-                    break;
-                }
+                // Stop loop prematurely
+                breakLoop = true;
+                break;
             }
         }
     }
 
+    // Release memory used by screenshot to avoid creating a leak
+    XDestroyImage(img);
 
-    // Clean up when we are done with this screenshot
-    //auto endTime = chrono::steady_clock::now(); // A few messages only needed for testing
+    //auto endTime = chrono::steady_clock::now();
     //cout << "\nMatches: " << matches << endl;
     //cout << "This iteration took " << chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count() << "ms.\n" << endl;
-
-    XDestroyImage(img); // Release allocated memory on the last iteration (otherwise we create a memory leak)
 }
 
 
@@ -103,7 +110,7 @@ int main() // Entry point
     screen  = XDefaultScreen(display);
     root    = RootWindow(display, screen);
 
-    x, y = 0;
+    x = 0, y = 0;
     width  = XDisplayWidth(display, screen); // This seems to return both monitors combined. If this impacts the scanning speed severely this needs to be fixed (seems to be fine)
     height = XDisplayHeight(display, screen);
 
