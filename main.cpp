@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-11 15:01:24
+ * Last Modified: 2025-04-11 15:52:43
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -60,9 +60,9 @@ void intervalEvent()
             //cout << "Pixel (" << row << "x" << col << ") Color (RGB): " << red << " " << green << " " << blue << endl;
 
             // Check if color is interesting
-            if (red == 0
-                && green >= 60 && green <= 210  // TODO: Test different brightness settings
-                && blue >= 10 && blue <= 90)
+            if (red >= 50 && red <= 60
+                && green >= 178 && green <= 187
+                && blue >= 77 && blue <= 87)
             {
                 //cout << "Match at " << row << "x" << col << "!" << endl;
                 matches++;
