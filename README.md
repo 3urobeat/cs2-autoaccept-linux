@@ -51,7 +51,7 @@ chmod +x ./cs2-autoaccept-linux
 ./cs2-autoaccept-linux
 ```
 
-You can stop the script by either pressing CTRL+C in the terminal or by closing the terminal window entirely.
+You can stop the script by either pressing <kbd>CTRL</kbd>+<kbd>C</kbd> in the terminal or by closing the terminal window entirely.
 
 > [!WARN]
 > It is important that you run the executable from a terminal. Executing it with a double click may cause it to run in the background forever.

@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-11 14:43:17
+ * Last Modified: 2025-04-11 15:01:24
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -22,7 +22,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h> // Used to simulate mouse click
 
-#define VERSION "2.0"
+#define VERSION "1.2"
 #define INTERVAL 4000   // Time in ms to wait between searches
 
 using namespace std;
@@ -71,9 +71,8 @@ void intervalEvent()
             // If we got 9000 matching pixels then it surely is the Accept button
             if (matches >= 9000)
             {
-                cout << "\r---------------------------------------------------------------" << endl;
-                cout << "[" << i << "] Button found! Accepting match..." << endl;
-                cout << "\nPlease close this window if everyone accepted, I will otherwise continue searching.\n" << endl;
+                cout << "\r\x1b[32m[" << i << "] Button found! Accepting match...\x1b[0m" << endl;
+                cout << "\nPlease close this window if everyone accepted and you are in the loading screen.\nI will otherwise continue searching.\n" << endl;
 
                 // Set cursor position, click and release (https://www.linuxquestions.org/questions/programming-9/simulating-a-mouse-click-594576/#post2936738)
                 XWarpPointer(display, None, root, 0, 0, 0, 0, row, col); // Update cursor position
@@ -105,7 +104,7 @@ int main() // Entry point
     // Print welcome message
     cout << "\n\x1b[36m            cs2-autoaccept-linux v" << VERSION << " by 3urobeat\x1b[0m" << endl; // Cyan and Reset color codes at the beginning and end of the string
     cout << "---------------------------------------------------------------"  << endl;
-    cout << "Checking your screen for a 'Accept' window every " << INTERVAL / 1000 << " second(s)..." << endl;
+    cout << "Checking your screen for a 'Accept' window every " << INTERVAL / 1000 << " second(s)...\n" << endl;
 
 
     // Establish connection to the X11 server https://stackoverflow.com/questions/24988164/c-fast-screenshots-in-linux-for-use-with-opencv & https://stackoverflow.com/questions/4049877/how-to-save-ximage-as-bitmap
