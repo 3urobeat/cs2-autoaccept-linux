@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-16 20:25:32
+ * Last Modified: 2025-04-16 21:45:26
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -20,6 +20,50 @@
 
 // Reusable variables
 int      screen, i, x, y, width, height;
+
+int write_to_ppm_stream(pixman_image_t *image, FILE *stream) {
+	// 256 bytes ought to be enough for everyone
+	char header[256];
+
+	int width = pixman_image_get_width(image);
+	int height = pixman_image_get_height(image);
+
+	int header_len = snprintf(header, sizeof(header), "P6\n%d %d\n255\n", width, height);
+	assert(header_len <= (int)sizeof(header));
+
+	size_t len = header_len + width * height * 3;
+	unsigned char *data = (unsigned char*) malloc(len);
+	unsigned char *buffer = data;
+
+	// We _do_not_ include the null byte
+	memcpy(buffer, header, header_len);
+	buffer += header_len;
+
+	pixman_format_code_t format = pixman_image_get_format(image);
+	assert(format == PIXMAN_a8r8g8b8 || format == PIXMAN_x8r8g8b8);
+
+	// Both formats are native-endian 32-bit ints
+	uint32_t *pixels = pixman_image_get_data(image);
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			uint32_t p = *pixels++;
+			// RGB order
+			*buffer++ = (p >> 16) & 0xff;
+			*buffer++ = (p >>  8) & 0xff;
+			*buffer++ = (p >>  0) & 0xff;
+		}
+	}
+
+	size_t written = fwrite(data, 1, len, stream);
+	if (written < len) {
+		free(data);
+		fprintf(stderr, "Failed to write ppm; only %zu of %zu bytes written\n",
+			written, len);
+		return -1;
+	}
+	free(data);
+	return 0;
+}
 
 
 void wayland()
@@ -91,8 +135,7 @@ void wayland()
     size_t n_pending = 0;
     struct grim_output *output;
     wl_list_for_each(output, &state.outputs, link) {
-        if (geometry != NULL &&
-                !intersect_box(geometry, &output->logical_geometry)) {
+        if (geometry != NULL && !intersect_box(geometry, &output->logical_geometry)) {
             continue;
         }
         if (use_greatest_scale && output->logical_scale > scale) {
@@ -129,7 +172,7 @@ void wayland()
         done = (state.n_done == n_pending);
     }
     if (!done) {
-        fprintf(stderr, "failed to screenshoot all outputs\n");
+        fprintf(stderr, "failed to screenshot all outputs\n");
         return;
     }
 
@@ -143,8 +186,16 @@ void wayland()
         return;
     }
 
+
+    // Save for testing
+    FILE *file = fopen("/home/tomke/test", "w");
+    int ret = write_to_ppm_stream(image, file);
+    fclose(file);
+
     printf("Done!\n");
 
+
+    // Clean up
     pixman_image_unref(image);
 
     struct grim_output *output_tmp;
