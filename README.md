@@ -1,8 +1,9 @@
 # cs2-autoaccept-linux
-This C++ script automatically accepts CS2 matches for you by analyzing your screen every 4 seconds and moving your mouse when it detects the 'Accept' button.  
-Since this script does not interfere with any game files it should be completely VAC safe.  
+This C++ script automatically accepts Counter-Strike 2 matches for you.  
+It does this by analyzing your screen every 4 seconds and moving and clicking with your mouse when it detects the 'Accept' button.  
+Since this script does not interfere with any game files and just takes screenshots of your display it is completely VAC safe.  
 
-This script is for Linux only. If you are on Windows see [my other repository for a Windows version.](https://github.com/3urobeat/cs2-autoaccept)  
+This script is for Linux only. If you are on Windows, please see [my other repository.](https://github.com/3urobeat/cs2-autoaccept)  
 
 ![Screenshot](https://raw.githubusercontent.com/3urobeat/cs2-autoaccept-linux/master/.github/img/showcase.png)   
   
@@ -59,9 +60,17 @@ You can stop the script by either pressing <kbd>CTRL</kbd>+<kbd>C</kbd> in the t
 The script will start scanning your screen every 4 seconds.  
 Queue for a match in CS2. The script will automatically accept it for you.
   
+> [!NOTE]
+> The game must be on your **primary display** and be focused. If you minimze the game the script won't work.  
+> The script works in Windowed, as well as in Fullscreen and isn't affected by your brightness settings.
+
 Stop/Close the window when you load into the match.  
 If not everyone accepted just leave the script open and it will continue scanning.  
 
-> [!NOTE]
-> The game must be focused and visible. If you minimze the game the script won't work.   
-> If the script does not recognize the button try changing your game brightness in the Video settings of CS2.  
+> [!IMPORTANT]
+> Should the script fail to find anything, please make sure that you don't use a color correction profile for your display.  
+> The scripts relies on matching colors in the screenshot it takes. A color profile changes these color values.
+
+&nbsp;
+
+Enjoy a toilet break while queueing!

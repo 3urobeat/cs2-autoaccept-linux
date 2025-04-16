@@ -1,6 +1,6 @@
 /*
  * File: main.cpp
- * Project: csgo-autoaccept-cpp
+ * Project: cs2-autoaccept-linux
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
