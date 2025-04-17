@@ -19,8 +19,7 @@
 
 #include <iostream>
 #include <chrono>
-//#include <pixman.h>
-#include <pixman-1/pixman.h>
+#include <pixman.h>
 #include <thread>
 #include <wayland-client.h>
 
@@ -37,8 +36,21 @@
 #include "include/grim/build/grim.p/xdg-output-unstable-v1-protocol.h"
 
 
-
 #define VERSION "1.2"
 #define INTERVAL 4000   // Time in ms to wait between searches
 
 using namespace std;
+
+#define die(str, args...) do { \
+    perror(str); \
+    exit(EXIT_FAILURE); \
+} while(0)
+
+extern void get_display();
+extern void take_screenshot(const char *filename);
+extern void clean_up();
+
+extern void signal_handler(int signo);
+extern void get_mouse();
+extern void set_mouse_pos(int x, int y);
+extern void mouse_click(int depressed);
