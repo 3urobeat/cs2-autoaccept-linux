@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 14:42:28
+ * Last Modified: 2025-04-18 15:43:24
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -18,60 +18,40 @@
 #include "main.h"
 
 
-// Reusable variables
-int      screen, i, x, y, width, height;
+int width = 0;
+int height = 0;
+int i = 0;
 
 
 // Function that will get executed every checkInterval ms to check the screen for the 'Accept' button
 void intervalEvent()
 {
+    //auto startTime = chrono::steady_clock::now(); // Only needed for testing to measure time this interval takes
     cout << "\r[" << i << "] Searching..." << flush; // Print and let it replace itself
 
-    //auto startTime = chrono::steady_clock::now(); // Only needed for testing to measure time this interval takes
-    bool breakLoop = false;
-    int  matches   = 0;
+    // Take screenshot
+    XImage *img = x11_take_screenshot(width, height);
 
-    // Make a screenshot
+    // Process screenshot
+    int match_x;
+    int match_y;
+    bool match = process_image(img, width, height, &match_x, &match_y);
 
-
-    // Iterate over every pixel in the screenshot
-    for (int row = 0; row < width && !breakLoop; row++) // x axis
+    // Print success message and manipulate cursor if a match was found
+    if (match)
     {
-        for (int col = 0; col < height && !breakLoop; col++) // y axis
-        {
-            // Get the color of this pixel
-            unsigned long  pxl   = 0;
-            unsigned short red   = (pxl >> 16) & 0xff;
-            unsigned short green = (pxl >>  8) & 0xff;
-            unsigned short blue  = (pxl >>  0) & 0xff;
-            //cout << "Pixel (" << row << "x" << col << ") Color (RGB): " << red << " " << green << " " << blue << endl;
+        cout << "\r\x1b[32m[" << i << "] Button found! Accepting match...\x1b[0m" << endl;
+        cout << "\nPlease close this window if everyone accepted and you are in the loading screen.\nI will otherwise continue searching.\n" << endl;
 
-            // Check if color is interesting
-            if (red >= 50 && red <= 60
-                && green >= 178 && green <= 187
-                && blue >= 77 && blue <= 87)
-            {
-                //cout << "Match at " << row << "x" << col << "!" << endl;
-                matches++;
-            }
-
-            // If we got 9000 matching pixels then it surely is the Accept button
-            if (matches >= 9000)
-            {
-                cout << "\r\x1b[32m[" << i << "] Button found! Accepting match...\x1b[0m" << endl;
-                cout << "\nPlease close this window if everyone accepted and you are in the loading screen.\nI will otherwise continue searching.\n" << endl;
-
-                // Set cursor position, click and release
-
-                // Stop loop prematurely
-                breakLoop = true;
-                break;
-            }
-        }
+        // Set cursor position, click and release
+        x11_set_mouse_pos(match_x, match_y);
+        x11_mouse_click(1);
+        usleep(100000); // 100ms
+        x11_mouse_click(0);
     }
 
     // Release memory used by screenshot to avoid creating a leak
-
+    XDestroyImage(img);
 
     //auto endTime = chrono::steady_clock::now();
     //cout << "\nMatches: " << matches << endl;
@@ -89,37 +69,37 @@ int main(int argc, char *argv[]) // Entry point
     cout << "---------------------------------------------------------------"  << endl;
     cout << "Checking your screen for a 'Accept' window every " << INTERVAL / 1000 << " second(s)...\n" << endl;
 
-    x = 0, y = 0;
+    // Setup screen
+    x11_get_display(&width, &height);
 
 
-    // TODO: Investigate: https://github.com/python-pillow/Pillow/issues/6392
-
-
-    take_screenshot();
+    // Wayland test area
+    /* wl_take_screenshot();
     sleep(1);
-    take_screenshot();
+    wl_take_screenshot();
 
 
-    /* get_mouse();
+    wl_get_mouse();
     sleep(1);
 
-    set_mouse_pos(50, 200);
+    wl_set_mouse_pos(50, 200);
     usleep(500000);
-    mouse_click(1);
+    wl_mouse_click(1);
 
     sleep(1);
 
-    signal_handler(0); */
+    wl_mouse_cleanup(0); */
+
 
     // Run intervalEvent() every checkInterval ms
-    /* while (true) {
+    while (true) {
         intervalEvent();
 
         i++; // Increase counter
 
         auto x = chrono::steady_clock::now() + chrono::milliseconds(INTERVAL);
         this_thread::sleep_until(x);
-    } */
+    }
 
     return 0;
 }

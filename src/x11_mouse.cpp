@@ -1,10 +1,10 @@
 /*
- * File: main.h
+ * File: x11_mouse.cpp
  * Project: cs2-autoaccept-linux
- * Created Date: 2025-04-16 19:09:04
+ * Created Date: 2025-04-18 15:10:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 14:45:05
+ * Last Modified: 2025-04-18 15:22:06
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -15,31 +15,19 @@
  */
 
 
-#pragma once
-
-#include <iostream>
-#include <chrono>
-#include <pixman.h>
-#include <thread>
-#include <libportal/portal.h>
-//#include <glib.h>
-//#include <gio/gio.h>
+#include "main.h"
 
 
-#define VERSION "1.2"
-#define INTERVAL 4000   // Time in ms to wait between searches
-
-using namespace std;
-
-#define die(str, args...) do { \
-    perror(str); \
-    exit(EXIT_FAILURE); \
-} while(0)
+void x11_set_mouse_pos(int x, int y)
+{
+    XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
+    XFlush(display); // Necessary to execute call
+}
 
 
-extern void take_screenshot();
-
-extern void signal_handler(int signo);
-extern void get_mouse();
-extern void set_mouse_pos(int x, int y);
-extern void mouse_click(int depressed);
+void x11_mouse_click(int depressed)
+{
+    // Reference: https://www.linuxquestions.org/questions/programming-9/simulating-a-mouse-click-594576/#post2936738
+    XTestFakeButtonEvent(display, 1, depressed, CurrentTime);
+    XFlush(display); // Necessary to execute call
+}

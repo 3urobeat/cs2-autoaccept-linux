@@ -1,23 +1,28 @@
-#include <cstdlib>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
+/*
+ * File: wayland_mouse.cpp
+ * Project: cs2-autoaccept-linux
+ * Created Date: 2025-04-17 16:12:26
+ * Author: 3urobeat
+ *
+ * Last Modified: 2025-04-18 15:11:25
+ * Modified By: 3urobeat
+ */
+
+// Code taken from: https://stackoverflow.com/questions/5190921/simulating-absolute-mouse-movements-in-linux-using-uinput
+
+
 #include <linux/input.h>
 #include <linux/uinput.h>
 #include <signal.h>
 
 #include "main.h"
 
-// https://stackoverflow.com/questions/5190921/simulating-absolute-mouse-movements-in-linux-using-uinput
-
 
 int fd;
 struct uinput_user_dev uidev;
 struct input_event     ev;
 
-void signal_handler(int signo)
+void wl_mouse_cleanup(int signo)
 {
     if(ioctl(fd, UI_DEV_DESTROY) < 0)
            die("error: cannot destroy uinput device\n");
@@ -26,9 +31,9 @@ void signal_handler(int signo)
     exit(EXIT_SUCCESS);
 }
 
-void get_mouse()
+void wl_get_mouse()
 {
-    if(signal(SIGINT,signal_handler)==SIG_ERR)
+    if (signal(SIGINT,wl_mouse_cleanup) == SIG_ERR)
     {
         printf("Error: Failed to register signal handler!\n");
         exit(EXIT_FAILURE);
@@ -85,7 +90,8 @@ void get_mouse()
         die("error: ioctl");
 }
 
-void set_mouse_pos(int x, int y)
+// TODO: Test if this works with touchpads
+void wl_set_mouse_pos(int x, int y)
 {
     memset(&ev, 0, sizeof(struct input_event));
     gettimeofday(&ev.time,NULL);
@@ -113,7 +119,7 @@ void set_mouse_pos(int x, int y)
         die("Error: Failed to sync ABS_Y");
 }
 
-void mouse_click(int depressed)
+void wl_mouse_click(int depressed)
 {
     memset(&ev, 0, sizeof(struct input_event));
     gettimeofday(&ev.time,NULL);
