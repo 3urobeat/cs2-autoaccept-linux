@@ -4,7 +4,7 @@
  * Created Date: 2025-04-16 19:09:04
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-16 20:10:00
+ * Last Modified: 2025-04-18 10:00:14
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -23,19 +23,6 @@
 #include <thread>
 #include <wayland-client.h>
 
-#include "include/grim/main.h"
-#include "include/grim/include/box.h"
-#include "include/grim/include/buffer.h"
-#include "include/grim/include/output-layout.h"
-#include "include/grim/include/render.h"
-#include "include/grim/include/grim.h"
-
-#include "include/grim/build/grim.p/ext-image-capture-source-v1-protocol.h"
-#include "include/grim/build/grim.p/ext-image-copy-capture-v1-protocol.h"
-#include "include/grim/build/grim.p/wlr-screencopy-unstable-v1-protocol.h"
-#include "include/grim/build/grim.p/xdg-output-unstable-v1-protocol.h"
-
-
 #define VERSION "1.2"
 #define INTERVAL 4000   // Time in ms to wait between searches
 
@@ -46,9 +33,10 @@ using namespace std;
     exit(EXIT_FAILURE); \
 } while(0)
 
-extern void get_display();
-extern void take_screenshot(const char *filename);
-extern void clean_up();
+
+extern void setup_portal();
+extern void take_screenshot();
+extern void destroy_portal();
 
 extern void signal_handler(int signo);
 extern void get_mouse();

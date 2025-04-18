@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-16 21:45:26
+ * Last Modified: 2025-04-18 10:44:28
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -95,13 +95,10 @@ int main(int argc, char *argv[]) // Entry point
     // TODO: Investigate: https://github.com/python-pillow/Pillow/issues/6392
 
 
-    get_display();
-    take_screenshot("test1");
-    /* sleep(5);
-    take_screenshot("test2");
-    sleep(5);
-    take_screenshot("test3"); */
-    clean_up();
+    setup_portal();
+    take_screenshot();
+    destroy_portal();
+
 
     /* get_mouse();
     sleep(1);
