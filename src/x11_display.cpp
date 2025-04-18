@@ -4,7 +4,7 @@
  * Created Date: 2025-04-18 15:07:27
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 15:54:39
+ * Last Modified: 2025-04-18 17:20:14
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -22,9 +22,9 @@ Display *display;
 Window   root;
 
 
-XImage *x11_take_screenshot(int width, int height)
+void x11_take_screenshot(int width, int height, void (*screenshot_callback)(XImage *img))
 {
-    return XGetImage(display, root, 0, 0, width, height, AllPlanes, ZPixmap);
+    screenshot_callback(XGetImage(display, root, 0, 0, width, height, AllPlanes, ZPixmap));
 }
 
 

@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 15:43:24
+ * Last Modified: 2025-04-18 17:43:58
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -21,16 +21,19 @@
 int width = 0;
 int height = 0;
 int i = 0;
+bool isUsingWayland;
 
 
-// Function that will get executed every checkInterval ms to check the screen for the 'Accept' button
-void intervalEvent()
+// Wayland screenshots are async as they might wait for user approval for example, so we provide a callback function to process the screenshot taken
+void screenshot_callback(XImage *img)
 {
-    //auto startTime = chrono::steady_clock::now(); // Only needed for testing to measure time this interval takes
-    cout << "\r[" << i << "] Searching..." << flush; // Print and let it replace itself
+    //auto startTime = chrono::steady_clock::now(); // Only needed for testing to measure time this interval takes // TODO: Doesn't factor in screenshot taking atm
 
-    // Take screenshot
-    XImage *img = x11_take_screenshot(width, height);
+    if (!img)
+    {
+        cout << "\nError: Did not receive a screenshot in callback! Did the screenshot fail?" << endl;
+        return;
+    }
 
     // Process screenshot
     int match_x;
@@ -44,10 +47,22 @@ void intervalEvent()
         cout << "\nPlease close this window if everyone accepted and you are in the loading screen.\nI will otherwise continue searching.\n" << endl;
 
         // Set cursor position, click and release
-        x11_set_mouse_pos(match_x, match_y);
-        x11_mouse_click(1);
-        usleep(100000); // 100ms
-        x11_mouse_click(0);
+        if (isUsingWayland)
+        {
+            wl_set_mouse_pos(match_x, match_y);
+            usleep(100000); // 100ms
+            wl_mouse_click(1);
+            usleep(100000); // 100ms
+            wl_mouse_click(0);
+        }
+        else
+        {
+            x11_set_mouse_pos(match_x, match_y);
+            usleep(100000); // 100ms
+            x11_mouse_click(1);
+            usleep(100000); // 100ms
+            x11_mouse_click(0);
+        }
     }
 
     // Release memory used by screenshot to avoid creating a leak
@@ -59,7 +74,25 @@ void intervalEvent()
 }
 
 
-int main(int argc, char *argv[]) // Entry point
+// Function that will get executed every checkInterval ms to check the screen for the 'Accept' button
+void intervalEvent()
+{
+    cout << "\r[" << i << "] Searching..." << flush; // Print and let it replace itself
+
+    // Take screenshot
+    if (isUsingWayland)
+    {
+        wl_take_screenshot(&screenshot_callback);
+    }
+    else
+    {
+        x11_take_screenshot(width, height, &screenshot_callback);
+    }
+}
+
+
+// Entry point
+int main(int argc, char *argv[])
 {
     // Set terminal title
     cout << "\033]0;cs2-autoaccept-linux v" << VERSION << " by 3urobeat\007";
@@ -67,10 +100,28 @@ int main(int argc, char *argv[]) // Entry point
     // Print welcome message
     cout << "\n\x1b[36m            cs2-autoaccept-linux v" << VERSION << " by 3urobeat\x1b[0m" << endl; // Cyan and Reset color codes at the beginning and end of the string
     cout << "---------------------------------------------------------------"  << endl;
-    cout << "Checking your screen for a 'Accept' window every " << INTERVAL / 1000 << " second(s)...\n" << endl;
+
+    // Determine display server
+    if (getenv("WAYLAND_DISPLAY"))
+    {
+        cout << "Detected Wayland environment..." << endl;
+        isUsingWayland = true;
+    }
+    else if (getenv("DISPLAY"))
+    {
+        cout << "Detected X11 environment..." << endl;
+        isUsingWayland = false;
+    }
+    else
+    {
+        die("Fatal: No display server detected! Are you running either X11 or Wayland?");
+    }
 
     // Setup screen
-    x11_get_display(&width, &height);
+    if (!isUsingWayland)
+    {
+        x11_get_display(&width, &height);
+    }
 
 
     // Wayland test area
@@ -92,6 +143,8 @@ int main(int argc, char *argv[]) // Entry point
 
 
     // Run intervalEvent() every checkInterval ms
+    cout << "Checking your screen for a 'Accept' window every " << INTERVAL / 1000 << " second(s)...\n" << endl;
+
     while (true) {
         intervalEvent();
 

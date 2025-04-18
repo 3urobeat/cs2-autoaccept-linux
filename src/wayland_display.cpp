@@ -4,7 +4,7 @@
  * Created Date: 2025-04-18 13:39:31
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 15:11:42
+ * Last Modified: 2025-04-18 17:43:36
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -28,17 +28,17 @@ void on_screenshot_response(GObject *source_object, GAsyncResult *res, gpointer 
     char *response = xdp_portal_take_screenshot_finish(portal, res, &error);
 
     if (error) {
-        cerr << "Screenshot failed: " << error->message << endl;
+        cerr << "\nScreenshot failed: " << error->message << endl;
         g_error_free(error);
         return;
     }
 
-    cout << "Screenshot saved at: " << response << endl;
+    //cout << "\nScreenshot saved at: " << response << endl;
     g_main_loop_quit(loop);
 }
 
 
-void wl_take_screenshot()
+void wl_take_screenshot(void (*screenshot_callback)(XImage *img)) // Yeah, I know, using XImage for Wayland ehhhhhh
 {
     // Create a new portal and request a screenshot
     portal = xdp_portal_new();

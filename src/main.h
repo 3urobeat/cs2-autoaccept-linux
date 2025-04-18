@@ -4,7 +4,7 @@
  * Created Date: 2025-04-16 19:09:04
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 15:40:30
+ * Last Modified: 2025-04-18 17:21:02
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -48,7 +48,7 @@ using namespace std;
 extern bool process_image(XImage *img, int width, int height, int *match_x, int *match_y);
 
 // wayland_display.cpp
-extern void wl_take_screenshot();
+extern void wl_take_screenshot(void (*screenshot_callback)(XImage *img));
 
 // wayland_mouse.cpp
 extern void wl_mouse_cleanup(int signo);
@@ -60,8 +60,8 @@ extern void wl_mouse_click(int depressed);
 extern Display *display;
 extern Window   root;
 
-extern XImage *x11_take_screenshot(int width, int height);
-extern void    x11_get_display(int *width, int *height);
+extern void x11_take_screenshot(int width, int height, void (*screenshot_callback)(XImage *img));
+extern void x11_get_display(int *width, int *height);
 
 // x11_mouse.cpp
 extern void x11_set_mouse_pos(int x, int y);
