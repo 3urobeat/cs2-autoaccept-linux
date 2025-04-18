@@ -1,75 +1,40 @@
-#include <cstdlib>
-#include <iostream>
-#include <gio/gio.h>
-#include <glib.h>
-#include <pixman.h>
-
 #include "main.h"
 
-GError *error;
-GDBusProxy *proxy;
+XdpPortal *portal;
+GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
 
-void setup_portal()
+// Callback when screenshot is done
+void on_screenshot_response(GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-    // Initialize GIO
-    //g_type_init();
+    GError *error = NULL;
+    char *response = xdp_portal_take_screenshot_finish(portal, res, &error);
 
-    // Create a GError pointer to capture any errors
-    error = nullptr;
-
-    // Create a GDBusProxy for the screenshot portal
-    proxy = g_dbus_proxy_new_for_bus_sync(
-        G_BUS_TYPE_SESSION,
-        G_DBUS_PROXY_FLAGS_NONE,
-        NULL,
-        "org.freedesktop.portal.Desktop",
-        "/org/freedesktop/portal/desktop",
-        "org.freedesktop.portal.Screenshot",
-        nullptr,
-        &error
-    );
-
-    // Check for errors
-    if (proxy == NULL || error) {
-        std::cerr << "Error creating proxy: " << error->message << std::endl;
+    if (error) {
+        cerr << "Screenshot failed: " << error->message << endl;
         g_error_free(error);
-        exit(EXIT_FAILURE);
+        return;
     }
+
+    cout << "Screenshot saved at: " << response << endl;
+    g_main_loop_quit(loop);
 }
+
 
 void take_screenshot()
 {
-    // Call the "Screenshot" method
-    GVariant *result = g_dbus_proxy_call_sync(
-        proxy,
-        "Screenshot",
-        g_variant_new("(sa{sv})", "screen"),
-        G_DBUS_CALL_FLAGS_NONE,
-        -1,
-        nullptr,
-        &error
+    // Create a new portal and request a screenshot
+    portal = xdp_portal_new();
+
+    xdp_portal_take_screenshot(
+        portal,
+        NULL,
+        XDP_SCREENSHOT_FLAG_NONE,
+        NULL,
+        on_screenshot_response,
+        NULL
     );
 
-    // Check for errors
-    if (error) {
-        std::cerr << "Error taking screenshot: " << error->message << std::endl;
-        g_error_free(error);
-        g_object_unref(proxy);
-        return;
-    }
-
-    if (!result) {
-        std::cerr << "No result returned from the screenshot portal." << std::endl;
-        return;
-    }
-
-    // Get uri where the portal saved the screenshot to and read it into a buffer
-
-}
-
-void destroy_portal()
-{
-    // Clean up
-    g_object_unref(proxy);
+    // Start a loop to prevent the application exiting before callback is called
+    g_main_loop_run(loop);
 }

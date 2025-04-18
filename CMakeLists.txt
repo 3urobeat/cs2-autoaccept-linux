@@ -12,11 +12,10 @@ add_executable(cs2-autoaccept-linux
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PIXMAN REQUIRED pixman-1)
-pkg_check_modules(WAYLAND REQUIRED wayland-client)
-pkg_check_modules(WLROOTS REQUIRED wlroots-0.18)
 pkg_check_modules(PORTAL REQUIRED libportal)
+#pkg_check_modules(GLIB REQUIRED glib-2.0)
 pkg_check_modules(GTK REQUIRED IMPORTED_TARGET "gtk+-2.0")
 
 find_package(X11 COMPONENTS Xtst)
-target_link_libraries(cs2-autoaccept-linux ${X11_LIBRARIES} ${X11_Xtst_LIB} ${PIXMAN_LIBRARIES} ${WAYLAND_LIBRARIES} ${PORTAL_LIBRARIES} PkgConfig::GTK) # ${WLROOTS_LIBRARIES}
+target_link_libraries(cs2-autoaccept-linux ${X11_LIBRARIES} ${X11_Xtst_LIB} ${PIXMAN_LIBRARIES} ${PORTAL_LIBRARIES} PkgConfig::GTK) # ${WLROOTS_LIBRARIES} ${GLIB_LIBRARIES}
 target_include_directories(cs2-autoaccept-linux PRIVATE ${PIXMAN_INCLUDE_DIRS})

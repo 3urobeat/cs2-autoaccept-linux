@@ -4,7 +4,7 @@
  * Created Date: 2025-04-16 19:09:04
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 10:00:14
+ * Last Modified: 2025-04-18 14:45:05
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -21,7 +21,10 @@
 #include <chrono>
 #include <pixman.h>
 #include <thread>
-#include <wayland-client.h>
+#include <libportal/portal.h>
+//#include <glib.h>
+//#include <gio/gio.h>
+
 
 #define VERSION "1.2"
 #define INTERVAL 4000   // Time in ms to wait between searches
@@ -34,9 +37,7 @@ using namespace std;
 } while(0)
 
 
-extern void setup_portal();
 extern void take_screenshot();
-extern void destroy_portal();
 
 extern void signal_handler(int signo);
 extern void get_mouse();
