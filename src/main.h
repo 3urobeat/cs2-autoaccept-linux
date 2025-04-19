@@ -4,7 +4,7 @@
  * Created Date: 2025-04-16 19:09:04
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 17:21:02
+ * Last Modified: 2025-04-19 13:09:34
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -24,9 +24,7 @@
 #include <thread>
 #include <unistd.h>
 #include <libportal/portal.h> // Used to take screenshot on Wayland
-//#include <pixman.h>
-//#include <glib.h>
-//#include <gio/gio.h>
+#include <png.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h> // Used to simulate mouse click when using X11
@@ -45,10 +43,10 @@ using namespace std;
 
 
 // process_image.cpp
-extern bool process_image(XImage *img, int width, int height, int *match_x, int *match_y);
+extern bool process_image(png_structp *png, png_infop *info, int *match_x, int *match_y);
 
 // wayland_display.cpp
-extern void wl_take_screenshot(void (*screenshot_callback)(XImage *img));
+extern void wl_take_screenshot(void (*screenshot_callback)(png_structp *png, png_infop *info));
 
 // wayland_mouse.cpp
 extern void wl_mouse_cleanup(int signo);
@@ -60,7 +58,7 @@ extern void wl_mouse_click(int depressed);
 extern Display *display;
 extern Window   root;
 
-extern void x11_take_screenshot(int width, int height, void (*screenshot_callback)(XImage *img));
+extern void x11_take_screenshot(int width, int height, void (*screenshot_callback)(png_structp *png, png_infop *info));
 extern void x11_get_display(int *width, int *height);
 
 // x11_mouse.cpp

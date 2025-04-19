@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 17:43:58
+ * Last Modified: 2025-04-19 13:18:01
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -18,18 +18,20 @@
 #include "main.h"
 
 
-int width = 0;
-int height = 0;
+int x11_width = 0;
+int x11_height = 0;
 int i = 0;
 bool isUsingWayland;
 
+// TODO: Catch exit and clean up screenshot
 
 // Wayland screenshots are async as they might wait for user approval for example, so we provide a callback function to process the screenshot taken
-void screenshot_callback(XImage *img)
+void screenshot_callback(png_structp *png, png_infop *info)
 {
     //auto startTime = chrono::steady_clock::now(); // Only needed for testing to measure time this interval takes // TODO: Doesn't factor in screenshot taking atm
 
-    if (!img)
+    // Sanity check
+    if (!png)
     {
         cout << "\nError: Did not receive a screenshot in callback! Did the screenshot fail?" << endl;
         return;
@@ -38,7 +40,7 @@ void screenshot_callback(XImage *img)
     // Process screenshot
     int match_x;
     int match_y;
-    bool match = process_image(img, width, height, &match_x, &match_y);
+    bool match = process_image(png, info, &match_x, &match_y);
 
     // Print success message and manipulate cursor if a match was found
     if (match)
@@ -65,11 +67,7 @@ void screenshot_callback(XImage *img)
         }
     }
 
-    // Release memory used by screenshot to avoid creating a leak
-    XDestroyImage(img);
-
     //auto endTime = chrono::steady_clock::now();
-    //cout << "\nMatches: " << matches << endl;
     //cout << "This iteration took " << chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count() << "ms.\n" << endl;
 }
 
@@ -86,7 +84,7 @@ void intervalEvent()
     }
     else
     {
-        x11_take_screenshot(width, height, &screenshot_callback);
+        x11_take_screenshot(x11_width, x11_height, &screenshot_callback);
     }
 }
 
@@ -120,7 +118,7 @@ int main(int argc, char *argv[])
     // Setup screen
     if (!isUsingWayland)
     {
-        x11_get_display(&width, &height);
+        x11_get_display(&x11_width, &x11_height);
     }
 
 
