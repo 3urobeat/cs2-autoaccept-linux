@@ -4,7 +4,7 @@
  * Created Date: 2025-04-17 16:12:26
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-18 15:11:25
+ * Last Modified: 2025-04-19 19:13:19
  * Modified By: 3urobeat
  */
 
@@ -42,7 +42,7 @@ void wl_get_mouse()
     fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (fd < 0)
     {
-        perror("Error: Failed to open input device");
+        perror("Error: Failed to open input device. Are you in the 'input' group? Error");
         exit(EXIT_FAILURE);
     }
 

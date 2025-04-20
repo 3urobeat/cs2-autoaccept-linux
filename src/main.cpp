@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-20 11:39:49
+ * Last Modified: 2025-04-20 12:14:21
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -42,6 +42,7 @@ void screenshot_callback(XImage *img, png_structp *png, png_infop *info)
     int match_x;
     int match_y;
     bool match = process_image(img, png, info, &match_x, &match_y);
+    //cout << "Match at " << match_x << "x" << match_y << endl;
 
     // Print success message and manipulate cursor if a match was found
     if (match)
@@ -52,6 +53,8 @@ void screenshot_callback(XImage *img, png_structp *png, png_infop *info)
         // Set cursor position, click and release
         if (isUsingWayland)
         {
+            wl_get_mouse(); // Get mouse every time, this is necessary
+            usleep(100000); // 100ms
             wl_set_mouse_pos(match_x, match_y);
             usleep(100000); // 100ms
             wl_mouse_click(1);
@@ -116,7 +119,7 @@ int main(int argc, char *argv[])
         die("Fatal: No display server detected! Are you running either X11 or Wayland?");
     }
 
-    // Setup mouse on wayland and screen on X11
+    // Setup mouse on wayland once to print error message if access denied and setup screen on X11
     if (isUsingWayland)
     {
         wl_get_mouse();
