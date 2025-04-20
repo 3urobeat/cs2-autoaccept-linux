@@ -4,7 +4,7 @@
  * Created Date: 2025-04-18 13:39:31
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-19 13:02:11
+ * Last Modified: 2025-04-20 11:37:21
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -18,10 +18,10 @@
 #include "main.h"
 
 
-XdpPortal *portal;
+XdpPortal *portal = xdp_portal_new(); // TODO: Will this cause issues on X11 systems without xdg-portals?
 GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
-void (*ss_callback_func)(png_structp *png, png_infop *info) = nullptr;
+void (*ss_callback_func)(XImage *img, png_structp *png, png_infop *info) = nullptr;
 
 
 // Helper function that loads the png file into a libpng struct
@@ -94,7 +94,7 @@ void load_png(const char* filename)
 
 
     // Make callback
-    ss_callback_func(&png, &info);
+    ss_callback_func(nullptr, &png, &info);
 
     // Cleanup
     png_destroy_read_struct(&png, &info, nullptr);
@@ -134,14 +134,12 @@ void on_screenshot_response(GObject *source_object, GAsyncResult *res, gpointer 
 }
 
 
-void wl_take_screenshot(void (*screenshot_callback)(png_structp *png, png_infop *info))
+void wl_take_screenshot(void (*screenshot_callback)(XImage *img, png_structp *png, png_infop *info))
 {
     // Save reference to callback function
     ss_callback_func = screenshot_callback;
 
-    // Create a new portal and request a screenshot
-    portal = xdp_portal_new();
-
+    // Request a screenshot
     xdp_portal_take_screenshot(
         portal,
         NULL,

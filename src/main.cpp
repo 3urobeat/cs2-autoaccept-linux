@@ -4,7 +4,7 @@
  * Created Date: 2021-06-04 17:00:05
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-19 13:18:01
+ * Last Modified: 2025-04-20 11:39:49
  * Modified By: 3urobeat
  *
  * Copyright (c) 2021 - 2025 3urobeat <https://github.com/3urobeat>
@@ -26,12 +26,13 @@ bool isUsingWayland;
 // TODO: Catch exit and clean up screenshot
 
 // Wayland screenshots are async as they might wait for user approval for example, so we provide a callback function to process the screenshot taken
-void screenshot_callback(png_structp *png, png_infop *info)
+// X11 uses XImage, Wayland uses libpng's png_structp & png_structp
+void screenshot_callback(XImage *img, png_structp *png, png_infop *info)
 {
     //auto startTime = chrono::steady_clock::now(); // Only needed for testing to measure time this interval takes // TODO: Doesn't factor in screenshot taking atm
 
     // Sanity check
-    if (!png)
+    if (!img && !png)
     {
         cout << "\nError: Did not receive a screenshot in callback! Did the screenshot fail?" << endl;
         return;
@@ -40,7 +41,7 @@ void screenshot_callback(png_structp *png, png_infop *info)
     // Process screenshot
     int match_x;
     int match_y;
-    bool match = process_image(png, info, &match_x, &match_y);
+    bool match = process_image(img, png, info, &match_x, &match_y);
 
     // Print success message and manipulate cursor if a match was found
     if (match)
@@ -115,8 +116,12 @@ int main(int argc, char *argv[])
         die("Fatal: No display server detected! Are you running either X11 or Wayland?");
     }
 
-    // Setup screen
-    if (!isUsingWayland)
+    // Setup mouse on wayland and screen on X11
+    if (isUsingWayland)
+    {
+        wl_get_mouse();
+    }
+    else
     {
         x11_get_display(&x11_width, &x11_height);
     }

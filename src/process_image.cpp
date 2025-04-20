@@ -4,7 +4,7 @@
  * Created Date: 2025-04-18 15:21:08
  * Author: 3urobeat
  *
- * Last Modified: 2025-04-19 12:59:36
+ * Last Modified: 2025-04-20 11:37:07
  * Modified By: 3urobeat
  *
  * Copyright (c) 2025 3urobeat <https://github.com/3urobeat>
@@ -18,24 +18,36 @@
 #include "main.h"
 
 
-// IN:  *png, *info
+// IN:  *img OR (*png AND *info)
 // OUT: *match_x, *match_y
-bool process_image(png_structp *png, png_infop *info, int *match_x, int *match_y)
+bool process_image(XImage *img, png_structp *png, png_infop *info, int *match_x, int *match_y)
 {
     bool breakLoop = false;
     int  matches   = 0;
 
+    int width;
+    int height;
+    png_bytep* row_pointers;
 
-    // Load the image we received into memory
-    int width = png_get_image_width(*png, *info);
-    int height = png_get_image_height(*png, *info);
-
-    png_bytep* row_pointers = new png_bytep[height];
-    for (int y = 0; y < height; y++) {
-        row_pointers[y] = new png_byte[png_get_rowbytes(*png, *info)];
+    if (img)
+    {
+        width = img->width;
+        height = img->height;
     }
+    else
+    {
+        // Load the image we received into memory
+        width = png_get_image_width(*png, *info);
+        height = png_get_image_height(*png, *info);
 
-    png_read_image(*png, row_pointers);
+        row_pointers = new png_bytep[height];
+        for (int y = 0; y < height; y++)
+        {
+            row_pointers[y] = new png_byte[png_get_rowbytes(*png, *info)];
+        }
+
+        png_read_image(*png, row_pointers);
+    }
 
 
     // Iterate over every pixel in the screenshot
@@ -44,10 +56,25 @@ bool process_image(png_structp *png, png_infop *info, int *match_x, int *match_y
         for (int col = 0; col < height && !breakLoop; col++) // y axis
         {
             // Get the color of this pixel
-            png_bytep pxl = &(row_pointers[col][row * 4]); // Assuming RGBA format
-            unsigned short red   = pxl[0];
-            unsigned short green = pxl[1];
-            unsigned short blue  = pxl[2];
+            unsigned short red;
+            unsigned short green;
+            unsigned short blue;
+
+            if (img)
+            {
+                unsigned long pxl = XGetPixel(img, row, col);
+                red   = (pxl >> 16) & 0xff;
+                green = (pxl >>  8) & 0xff;
+                blue  = (pxl >>  0) & 0xff;
+            }
+            else
+            {
+                png_bytep pxl = &(row_pointers[col][row * 4]);
+                red   = pxl[0];
+                green = pxl[1];
+                blue  = pxl[2];
+            }
+
             //cout << "Pixel (" << row << "x" << col << ") Color (RGB): " << red << " " << green << " " << blue << endl;
 
             // Check if color is interesting
@@ -74,10 +101,13 @@ bool process_image(png_structp *png, png_infop *info, int *match_x, int *match_y
 
 
     // Cleanup
-    for (int y = 0; y < height; y++) {
-        delete[] row_pointers[y];
+    if (png)
+    {
+        for (int y = 0; y < height; y++) {
+            delete[] row_pointers[y];
+        }
+        delete[] row_pointers;
     }
-    delete[] row_pointers;
 
 
     // If loop was aborted a match was found
